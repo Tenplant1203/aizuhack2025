@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite" // PostgreSQLとかでもOK
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model Thread {
@@ -21,4 +21,7 @@ model Comment {
   threadId  Int
   thread    Thread    @relation(fields: [threadId], references: [id])
   createdAt DateTime  @default(now())
+  parentId  Int?
+  parent    Comment?  @relation("CommentToComment", fields: [parentId], references: [id])
+  children  Comment[] @relation("CommentToComment")
 }
