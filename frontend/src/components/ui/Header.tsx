@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "./button";
+import { ThemeToggle } from "./ThemeToggle";
 import Link from "next/link";
 
 const navItems = [
@@ -30,6 +31,7 @@ export default function Header() {
           </Button>
         ))}
       </nav>
+      <ThemeToggle />
     </header>
   );
 }
