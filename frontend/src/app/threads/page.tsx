@@ -7,7 +7,6 @@ export default function CreateThreadPage() {
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-3xl font-semibold mb-6">スレッド作成</h1>
       <form className="space-y-4">
-        {/* タイトル */}
         <div>
           <label
             htmlFor="title"
@@ -17,7 +16,6 @@ export default function CreateThreadPage() {
           </label>
           <Input id="title" placeholder="例: 今週末の勉強会について" />
         </div>
-        {/* 本文 */}
         <div>
           <label
             htmlFor="content"
@@ -27,9 +25,8 @@ export default function CreateThreadPage() {
           </label>
           <Textarea id="content" placeholder="本文を入力…" rows={6} />
         </div>
-        {/* 送信 */}
         <div className="flex flex-wrap items-center gap-2 md:flex-row">
-          <Button>Button</Button>
+          <Button>スレッド作成</Button>
         </div>
       </form>
     </div>
