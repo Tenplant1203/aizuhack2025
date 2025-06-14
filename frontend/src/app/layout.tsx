@@ -1,15 +1,14 @@
-// app/layout.tsx
 import { Inter } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
-  subsets: ["latin"], // 必要に応じて "latin-ext" なども追加
-  variable: "--font-inter", // カスタムプロパティとしても使える
-  display: "swap", // FOUTを減らす
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
 export const metadata = {
-  title: "Your App",
+  title: "Our App",
   description: "Example of Inter font setup",
 };
 
