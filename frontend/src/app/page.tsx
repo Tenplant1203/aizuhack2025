@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@ui/components/ui/card";
 
 export default function Home() {
   return (
@@ -17,14 +17,12 @@ export default function Home() {
         スレッド作成、コメント、メンション、アーカイブ機能を備えています。
       </p>
       <div className="space-x-4">
-        <Link href="/auth/login">
-          <Button size="lg">ログイン</Button>
-        </Link>
-        <Link href="/auth/signup">
-          <Button variant="outline" size="lg">
-            新規登録
-          </Button>
-        </Link>
+        <Button size="lg">
+          <Link href="/auth/login">ログイン </Link>
+        </Button>
+        <Button variant="outline" size="lg">
+          <Link href="/auth/signup">新規登録</Link>
+        </Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
         <Card>

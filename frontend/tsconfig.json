@@ -19,7 +19,11 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@ui/*": ["./src/*"],
+      "@auth/*": ["features/auth/components/*"],
+      "@authHooks/*": ["features/auth/hooks/*"],
+      "@threads/*": ["features/threads/components/*"],
+      "@threadHooks/*": ["features/threads/hooks/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
