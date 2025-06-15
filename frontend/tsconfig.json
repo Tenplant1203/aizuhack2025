@@ -18,12 +18,14 @@
         "name": "next"
       }
     ],
+    "baseUrl": "src",
     "paths": {
-      "@ui/*": ["./src/*"],
+      "@/*": ["*"],
+      "@ui/*": ["components/ui/*"],
       "@auth/*": ["features/auth/components/*"],
-      "@authHooks/*": ["features/auth/hooks/*"],
+      "@auth/hooks/*": ["features/auth/hooks/*"],
       "@threads/*": ["features/threads/components/*"],
-      "@threadHooks/*": ["features/threads/hooks/*"]
+      "@threads/hooks/*": ["features/threads/hooks/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

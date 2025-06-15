@@ -1,5 +1,5 @@
 import { Inter } from "next/font/google";
-import Header from "@ui/components/ui/Header";
+import Header from "@ui/Header";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
 

@@ -1,6 +1,6 @@
-import { Button } from "@ui/components/ui/button";
-import { Input } from "@ui/components/ui/input";
-import { Textarea } from "@ui/components/ui/textarea";
+import { Button } from "@ui/button";
+import { Input } from "@ui/input";
+import { Textarea } from "@ui/textarea";
 
 export default function CreateThreadPage() {
   return (

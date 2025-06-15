@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { Button } from "@ui/components/ui/button";
+import { Button } from "@ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@ui/components/ui/card";
+} from "@ui/card";
 
 export default function Home() {
   return (

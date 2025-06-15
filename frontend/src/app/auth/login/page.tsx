@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@ui/components/ui/button";
+import { Button } from "@ui/button";
 import {
   Card,
   CardAction,
@@ -9,11 +9,12 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@ui/components/ui/card";
-import { Input } from "@ui/components/ui/input";
-import { Label } from "@ui/components/ui/label";
+} from "@ui/card";
+import { Input } from "@ui/input";
+import { Label } from "@ui/label";
 import { login } from "./actions";
 import Link from "next/link";
+import GithubLoginButton from "@auth/GithubLoginButton";
 
 export default function Login() {
   return (
@@ -63,9 +64,7 @@ export default function Login() {
           >
             ログイン
           </Button>
-          <Button variant="outline" className="w-full cursor-pointer">
-            Githubでログイン
-          </Button>
+          <GithubLoginButton />
         </CardFooter>
       </Card>
     </div>
