@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,10 +12,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { login } from "./actions";
+import Link from "next/link";
 
 export default function Login() {
   return (
-    <div>
+    <div className="flex justify-center items-center h-screen">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Login to your account</CardTitle>
@@ -21,7 +25,9 @@ export default function Login() {
             Enter your email below to login to your account
           </CardDescription>
           <CardAction>
-            <Button variant="link">Sign Up</Button>
+            <Button variant="link">
+              <Link href="/auth/signup">Sign Up</Link>
+            </Button>
           </CardAction>
         </CardHeader>
         <CardContent>
@@ -52,10 +58,14 @@ export default function Login() {
           </form>
         </CardContent>
         <CardFooter className="flex-col gap-2">
-          <Button type="submit" className="w-full">
+          <Button
+            type="submit"
+            className="w-full cursor-pointer"
+            formAction={login}
+          >
             Login
           </Button>
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" className="w-full cursor-pointer">
             Login with github
           </Button>
         </CardFooter>
