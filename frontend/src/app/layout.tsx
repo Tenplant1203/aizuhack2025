@@ -1,7 +1,12 @@
+"use client";
+
 import { Inter } from "next/font/google";
 import Header from "@ui/Header";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
+import { useState } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { SessionContextProvider } from "@supabase/auth-helpers-react";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -9,34 +14,30 @@ const inter = Inter({
   display: "swap",
 });
 
-export const metadata = {
-  title: "Our App",
-  description: "Example of Inter font setup",
-};
-
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [supabaseClient] = useState(() => createClientComponentClient());
+
   return (
     <html lang="ja" className={inter.variable} suppressHydrationWarning>
-      {/* 
-      suppressHydrationWarning:
-      ThemeProvider の SSR と CSR のマークアップ差分による
-      Hydration 警告を見えなくしたいので追加
-      本番環境では出ないはずです
-    */}
       <body className="font-sans">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
+        <SessionContextProvider
+          supabaseClient={supabaseClient}
+          initialSession={null}
         >
-          <Header />
-          {children}
-        </ThemeProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Header />
+            {children}
+          </ThemeProvider>
+        </SessionContextProvider>
       </body>
     </html>
   );
