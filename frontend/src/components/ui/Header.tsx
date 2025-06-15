@@ -47,8 +47,8 @@ export default function Header() {
           ログアウト
         </Button>
       ) : (
-        <Button key="/login" variant="ghost" asChild>
-          <Link href="/login" className="text-xs font-medium leading-none">
+        <Button key="/auth/login" variant="ghost" asChild>
+          <Link href="/auth/login" className="text-xs font-medium leading-none">
             ログイン
           </Link>
         </Button>
