@@ -7,21 +7,38 @@ datasource db {
   url      = "file:./dev.db"
 }
 
-model Thread {
+model User {
   id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  createdAt DateTime  @default(now())
+  threads   Thread[]  @relation("UserThreads")
+  comments  Comment[] @relation("UserComments")
+}
+
+model Thread {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid())
   title     String
   content   String
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
   comments  Comment[]
+  userId    Int
+  user      User     @relation("UserThreads", fields: [userId], references: [id])
 }
 
 model Comment {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid())
   content   String
-  threadId  Int
-  thread    Thread    @relation(fields: [threadId], references: [id])
-  createdAt DateTime  @default(now())
+  threadId  Int?
+  thread    Thread?  @relation(fields: [threadId], references: [id])
+  createdAt DateTime @default(now())
   parentId  Int?
-  parent    Comment?  @relation("CommentToComment", fields: [parentId], references: [id])
+  parent    Comment? @relation("CommentToComment", fields: [parentId], references: [id])
   children  Comment[] @relation("CommentToComment")
+  userId    Int
+  user      User     @relation("UserComments", fields: [userId], references: [id])
+  parentType String? // "thread" or "comment" どちらが親かを示す
+  parentUuid String? // 親のuuid（ThreadまたはCommentのuuid）
 }
