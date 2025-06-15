@@ -4,8 +4,8 @@ import { Inter } from "next/font/google";
 import Header from "@ui/Header";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
-import { useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { ReactNode, useState } from "react";
 import { SessionContextProvider } from "@supabase/auth-helpers-react";
 
 const inter = Inter({
@@ -14,20 +14,17 @@ const inter = Inter({
   display: "swap",
 });
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [supabaseClient] = useState(() => createClientComponentClient());
+export default function RootLayout({ children }: { children: ReactNode }) {
+  const [supabaseClient] = useState(() =>
+    createClientComponentClient({
+      auth: { persistSession: true, detectSessionInUrl: false },
+    }),
+  );
 
   return (
     <html lang="ja" className={inter.variable} suppressHydrationWarning>
       <body className="font-sans">
-        <SessionContextProvider
-          supabaseClient={supabaseClient}
-          initialSession={null}
-        >
+        <SessionContextProvider supabaseClient={supabaseClient}>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
