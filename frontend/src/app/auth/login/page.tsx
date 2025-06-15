@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@ui/components/ui/button";
 import {
   Card,
   CardAction,
@@ -9,9 +9,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@ui/components/ui/card";
+import { Input } from "@ui/components/ui/input";
+import { Label } from "@ui/components/ui/label";
 import { login } from "./actions";
 import Link from "next/link";
 
@@ -20,13 +20,11 @@ export default function Login() {
     <div className="flex justify-center items-center h-screen">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
-          </CardDescription>
+          <CardTitle>ログイン</CardTitle>
+          <CardDescription>メールアドレスとパスワードを入力</CardDescription>
           <CardAction>
             <Button variant="link">
-              <Link href="/auth/signup">Sign Up</Link>
+              <Link href="/auth/signup">新規登録</Link>
             </Button>
           </CardAction>
         </CardHeader>
@@ -34,7 +32,7 @@ export default function Login() {
           <form>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">メールアドレス</Label>
                 <Input
                   id="email"
                   type="email"
@@ -44,12 +42,12 @@ export default function Login() {
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">パスワード</Label>
                   <a
                     href="#"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                   >
-                    Forgot your password?
+                    パスワードを忘れましたか？
                   </a>
                 </div>
                 <Input id="password" type="password" required />
@@ -63,10 +61,10 @@ export default function Login() {
             className="w-full cursor-pointer"
             formAction={login}
           >
-            Login
+            ログイン
           </Button>
           <Button variant="outline" className="w-full cursor-pointer">
-            Login with github
+            Githubでログイン
           </Button>
         </CardFooter>
       </Card>

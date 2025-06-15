@@ -5,11 +5,11 @@ import { ThemeToggle } from "./ThemeToggle";
 import Link from "next/link";
 
 const navItems = [
-  { label: "Threads", href: "/threads" },
-  { label: "New Thread", href: "/threads/new" },
-  { label: "Archived", href: "/threads/archived" },
-  { label: "Share", href: "/share" },
-  { label: "Profile", href: "/profile" },
+  { label: "スレッド", href: "/threads" },
+  { label: "スレッド作成", href: "/threads/new" },
+  { label: "アーカイブ", href: "/threads/archived" },
+  { label: "共有", href: "/share" },
+  { label: "プロフィール", href: "/profile" },
 ];
 
 export default function Header() {
@@ -18,7 +18,7 @@ export default function Header() {
       <div>
         <Button variant="ghost" asChild>
           <Link href="/" className="text-xs font-medium leading-none">
-            SuperHacker
+            Threadly
           </Link>
         </Button>
       </div>
