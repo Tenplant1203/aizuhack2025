@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@ui/button";
 import {
@@ -7,8 +9,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@ui/card";
+import { useSession } from "@supabase/auth-helpers-react";
 
 export default function Home() {
+  const session = useSession();
   return (
     <div className="min-h-screen flex flex-col items-center justify-center space-y-8 px-6 text-center">
       <h1 className="text-4xl font-bold">Threadly</h1>
@@ -16,14 +20,20 @@ export default function Home() {
         シンプル＆高速なスレッド型コミュニケーションプラットフォーム。
         スレッド作成、コメント、メンション、アーカイブ機能を備えています。
       </p>
-      <div className="space-x-4">
-        <Button size="lg">
-          <Link href="/auth/login">ログイン </Link>
+      {session ? (
+        <Button>
+          <Link href="/threads">スレッド一覧へ</Link>
         </Button>
-        <Button variant="outline" size="lg">
-          <Link href="/auth/signup">新規登録</Link>
-        </Button>
-      </div>
+      ) : (
+        <div className="space-x-4">
+          <Button size="lg">
+            <Link href="/auth/login">ログイン </Link>
+          </Button>
+          <Button variant="outline" size="lg">
+            <Link href="/auth/signup">新規登録</Link>
+          </Button>
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
         <Card>
           <CardHeader>

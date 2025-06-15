@@ -1,8 +1,22 @@
+"use client";
+
+import { useSession } from "@supabase/auth-helpers-react";
 import { Button } from "@ui/button";
 import { Input } from "@ui/input";
 import { Textarea } from "@ui/textarea";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function CreateThreadPage() {
+  const session = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!session) {
+      router.replace("auth/login");
+    }
+  }, [session, router]);
+
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-3xl font-semibold mb-6">スレッド作成</h1>
