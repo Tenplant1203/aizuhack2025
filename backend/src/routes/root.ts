@@ -94,16 +94,35 @@ router.get('/', async (ctx: Context) => {
             div.innerHTML =
               '<strong data-type="thread" data-uuid="' + thread.uuid + '" class="clickable">' + thread.title + '</strong> by ユーザーID:' + thread.userId + '<br />' +
               '<div>' + thread.content + '</div>' +
+              '<button type="button" class="delete-thread" data-uuid="' + thread.uuid + '">スレッド削除</button>' +
               '<div class="comments" id="thread-comments-' + thread.uuid + '">' +
               renderChildren(thread.comments, thread.uuid, 'thread') +
               '</div>';
             el.appendChild(div);
           });
+          // スレッドクリック時は必ず展開＋コメント選択可能に
           document.querySelectorAll('.clickable[data-type="thread"]').forEach(function(el) {
-            el.addEventListener('click', function() {
+            el.addEventListener('click', function(e) {
+              e.stopPropagation();
               const uuid = this.getAttribute('data-uuid');
-              expanded['thread-' + uuid] = !expanded['thread-' + uuid];
+              expanded['thread-' + uuid] = true; // 必ず展開
               renderThreadChildren(uuid);
+              replyTarget = { type: 'thread', uuid: uuid };
+              showReplyForm('親: スレッド（uuid=' + uuid + '）');
+            });
+          });
+          // スレッド削除ボタン
+          document.querySelectorAll('.delete-thread').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              if (confirm('本当にこのスレッドを削除しますか？')) {
+                fetch('/threads/' + btn.getAttribute('data-uuid'), { method: 'DELETE' })
+                  .then(res => res.json())
+                  .then(data => {
+                    document.getElementById('deleteResult').innerText = data.message || '';
+                    fetchThreads();
+                  });
+              }
             });
           });
           // 返信直後に親を自動展開
@@ -118,6 +137,7 @@ router.get('/', async (ctx: Context) => {
             var hasChildren = c.children && c.children.length > 0;
             html += '<div class="comment" data-type="comment" data-uuid="' + c.uuid + '">' +
               '<span class="clickable" data-type="comment" data-uuid="' + c.uuid + '">' + c.content + ' (by ユーザーID:' + c.userId + ')</span>';
+            html += ' <button type="button" class="delete-comment" data-uuid="' + c.uuid + '">コメント削除</button>';
             if (hasChildren) {
               var isExpanded = expanded['comment-' + c.uuid];
               html += ' <button type="button" class="toggle-children" data-uuid="' + c.uuid + '" data-thread-uuid="' + findThreadUuidByComment(c.uuid) + '">' + (isExpanded ? '−' : '+') + '</button>';
@@ -155,12 +175,16 @@ router.get('/', async (ctx: Context) => {
             var thread = threads.find(function(t) { return t.uuid == threadUuid; });
             var el = document.getElementById('thread-comments-' + threadUuid);
             el.innerHTML = renderChildren(thread.comments, threadUuid, 'thread');
-            document.querySelectorAll('.clickable[data-type="comment"]').forEach(function(el) {
+            // コメントクリック時もreplyTargetを必ずセット
+            el.querySelectorAll('.clickable[data-type="comment"]').forEach(function(el) {
               el.addEventListener('click', function(e) {
                 e.stopPropagation();
                 var uuid = this.getAttribute('data-uuid');
-                expanded['comment-' + uuid] = expanded['comment-' + uuid] ? expanded['comment-' + uuid] : false;
+                expanded['comment-' + uuid] = true;
                 renderCommentChildren(uuid, threadUuid);
+                var parentInfo = findParentInfo(uuid, threadUuid);
+                replyTarget = { type: 'comment', uuid: uuid, threadUuid: threadUuid };
+                showReplyForm(parentInfo);
               });
             });
             document.querySelectorAll('.toggle-children').forEach(function(btn) {
@@ -192,12 +216,16 @@ router.get('/', async (ctx: Context) => {
             var comment = findComment(thread.comments, commentUuid);
             var el = document.getElementById('comment-children-' + commentUuid);
             el.innerHTML = renderChildren(comment.children || [], commentUuid, 'comment');
-            document.querySelectorAll('.clickable[data-type="comment"]').forEach(function(el) {
+            // コメントクリック時もreplyTargetを必ずセット
+            el.querySelectorAll('.clickable[data-type="comment"]').forEach(function(el) {
               el.addEventListener('click', function(e) {
                 e.stopPropagation();
                 var uuid = this.getAttribute('data-uuid');
-                expanded['comment-' + uuid] = expanded['comment-' + uuid] ? expanded['comment-' + uuid] : false;
+                expanded['comment-' + uuid] = true;
                 renderCommentChildren(uuid, threadUuid);
+                var parentInfo = findParentInfo(uuid, threadUuid);
+                replyTarget = { type: 'comment', uuid: uuid, threadUuid: threadUuid };
+                showReplyForm(parentInfo);
               });
             });
             document.querySelectorAll('.toggle-children').forEach(function(btn) {
@@ -310,10 +338,35 @@ router.get('/', async (ctx: Context) => {
               fetchThreads();
             });
         });
+        // --- 返信先リセットボタンの初期化をDOMContentLoadedで遅延 ---
+        document.addEventListener('DOMContentLoaded', function() {
+          var resetBtn = document.getElementById('resetReplyTargetBtn');
+          if (resetBtn) {
+            resetBtn.addEventListener('click', function() {
+              replyTarget = null;
+              document.getElementById('replyArea').innerHTML = '';
+            });
+          }
+        });
+        document.addEventListener('click', function(e) {
+          if (e.target.classList && e.target.classList.contains('delete-comment')) {
+            e.stopPropagation();
+            if (confirm('本当にこのコメントを削除しますか？')) {
+              fetch('/comments/' + e.target.getAttribute('data-uuid'), { method: 'DELETE' })
+                .then(res => res.json())
+                .then(data => {
+                  document.getElementById('deleteResult').innerText = data.message || '';
+                  fetchThreads();
+                });
+            }
+          }
+        });
         fetchThreads();
         fetchUsers();
       </script>
       <div id="replyArea"></div>
+      <button id="resetReplyTargetBtn" type="button">返信先リセット</button>
+      <div id="deleteResult" style="color:red"></div>
     </body>
     </html>
   `;
