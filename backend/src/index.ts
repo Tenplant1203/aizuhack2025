@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import bodyParser from 'koa-bodyparser';
 import commentsRouter from './routes/comments';
 import rootRouter from './routes/root';
+import eliminateRouter from './routes/eliminate';
 import { v4 as uuidv4 } from 'uuid';
 
 const app = new Koa();
@@ -17,6 +18,7 @@ interface Context extends Koa.Context {
 app.use(bodyParser());
 app.use(commentsRouter.routes());
 app.use(rootRouter.routes());
+app.use(eliminateRouter.routes());
 
 router.get('/user', async (ctx: Context) => {
   ctx.body = await prisma.user.findMany();
