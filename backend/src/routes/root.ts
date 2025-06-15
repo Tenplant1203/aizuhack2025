@@ -37,7 +37,7 @@ router.get('/', async (ctx: Context) => {
       <h4>ユーザー一覧</h4>
       <ul id="userList"></ul>
       <form id="threadForm">
-        <input name="userId" placeholder="ユーザーID" required />
+        <input type="number" name="userId" placeholder="ユーザーID" required />
         <input name="title" placeholder="タイトル" required />
         <input name="content" placeholder="内容" required />
         <button type="submit">作成</button>
@@ -235,7 +235,7 @@ router.get('/', async (ctx: Context) => {
           if (replyTarget) {
             formHtml =
               '<form id="replyForm">' +
-              '<input name="userId" placeholder="ユーザーID" required />' +
+              '<input type="number" name="userId" placeholder="ユーザーID" required />' +
               '<input name="content" placeholder="内容" required />' +
               '<button type="submit">返信</button>' +
               '</form>' +
