@@ -103,8 +103,11 @@
             thread.uuid +
             '" class="clickable">' +
             thread.title +
-            "</strong> by ユーザーID:" +
+            "</strong> " +
+            thread.user.name + 
+            " (ID:" +
             thread.userId +
+            ")"+
             "<br />" +
             "<div>" +
             thread.content +
@@ -167,7 +170,9 @@
             c.uuid +
             '">' +
             c.content +
-            " (by ユーザーID:" +
+            "　" +
+            c.user.name + 
+            " (ID:" +
             c.userId +
             ")</span>";
           html +=
