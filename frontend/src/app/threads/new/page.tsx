@@ -1,48 +1,61 @@
 "use client";
 
-import { useSession } from "@supabase/auth-helpers-react";
-import { Button } from "@ui/button";
-import { Input } from "@ui/input";
-import { Textarea } from "@ui/textarea";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { BASE_URL } from "@/lib/constants";
+import { Button } from "@/components/ui/button";
 
-export default function CreateThreadPage() {
-  const session = useSession();
+export default function NewThreadPage() {
   const router = useRouter();
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [err, setErr] = useState("");
 
-  useEffect(() => {
-    if (!session) {
-      router.replace("auth/login");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErr("");
+
+    try {
+      const res = await fetch(`${BASE_URL}/threads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, content, userId: 1 }), // ★仮ユーザーID
+      });
+
+      if (!res.ok) {
+        throw new Error(`API ${res.status}`);
+      }
+      router.push("/threads");
+    } catch (error: any) {
+      setErr(error.message ?? "Failed to fetch");
     }
-  }, [session, router]);
+  };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-3xl font-semibold mb-6">スレッド作成</h1>
-      <form className="space-y-4">
-        <div>
-          <label
-            htmlFor="title"
-            className="block text-sm font-medium text-gray-700"
-          >
-            タイトル
-          </label>
-          <Input id="title" placeholder="例: 今週末の勉強会について" />
-        </div>
-        <div>
-          <label
-            htmlFor="content"
-            className="block text-sm font-medium text-gray-700"
-          >
-            本文
-          </label>
-          <Textarea id="content" placeholder="本文を入力…" rows={6} />
-        </div>
-        <div className="flex flex-wrap items-center gap-2 md:flex-row">
-          <Button>スレッド作成</Button>
-        </div>
-      </form>
-    </div>
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto p-6">
+      <h1 className="text-2xl font-bold">新しいスレッドを作成</h1>
+
+      <label className="block">
+        <span>タイトル</span>
+        <input
+          className="mt-1 w-full border p-2 rounded"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+      </label>
+
+      <label className="block">
+        <span>本文</span>
+        <textarea
+          className="mt-1 w-full border p-2 rounded h-40"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+      </label>
+
+      {err && <p className="text-red-600">エラー：{err}</p>}
+
+      <Button type="submit">スレッドを作成</Button>
+    </form>
   );
 }
