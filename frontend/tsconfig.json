@@ -21,6 +21,7 @@
     "baseUrl": "src",
     "paths": {
       "@/*": ["*"],
+      "@lib/*": ["lib/*"],
       "@ui/*": ["components/ui/*"],
       "@auth/*": ["features/auth/components/*"],
       "@auth/hooks/*": ["features/auth/hooks/*"],
