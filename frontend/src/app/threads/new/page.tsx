@@ -1,66 +1,80 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { BASE_URL } from "@/lib/constants";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function NewThreadPage() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [err, setErr] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErr("");
+    setError(null);
 
+    if (!title.trim() || !content.trim()) {
+      setError("タイトルと本文を両方入力してください");
+      return;
+    }
+
+    setLoading(true);
     try {
-      const payload = { title, content, userId: 1 }; // 例として userId=1
-      console.log("▶︎ Sending payload:", payload);
-
-      const res = await fetch(`${BASE_URL}/threads`, {
+      const res = await fetch("http://localhost:4000/threads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          title: title.trim(),
+          content: content.trim(),
+          userId: 1, // 本番ではログイン中ユーザーの ID をセット
+        }),
       });
 
       if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        console.error("❌ API 400 response:", body);
+        const body = await res.json().catch(() => ({}) as any);
         throw new Error(body.error || `HTTP ${res.status}`);
       }
-      router.push("/threads");
-    } catch (err: any) {
-      setErr(err.message);
+
+      const created = await res.json(); // { id, uuid, ... }
+      // 作成後は詳細ページへ遷移
+      router.push(`/threads/${created.uuid}`);
+    } catch (e: any) {
+      setError("作成に失敗しました: " + e.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto p-6">
-      <h1 className="text-2xl font-bold">新しいスレッドを作成</h1>
-
-      <label className="block">
-        <span>タイトル</span>
-        <input
-          className="mt-1 w-full border p-2 rounded"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-      </label>
-
-      <label className="block">
-        <span>本文</span>
-        <textarea
-          className="mt-1 w-full border p-2 rounded h-40"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
-      </label>
-
-      {err && <p className="text-red-600">エラー：{err}</p>}
-
-      <Button type="submit">スレッドを作成</Button>
-    </form>
+    <main className="max-w-lg mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-4">新しいスレッドを作成</h1>
+      {error && <p className="mb-4 text-red-600">{error}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block mb-1">タイトル</label>
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.currentTarget.value)}
+            placeholder="スレッドのタイトル"
+          />
+        </div>
+        <div>
+          <label className="block mb-1">本文</label>
+          <Textarea
+            value={content}
+            onChange={(e) => setContent(e.currentTarget.value)}
+            placeholder="スレッドの内容を入力…"
+            rows={6}
+          />
+        </div>
+        <Button type="submit" disabled={loading}>
+          {loading ? "送信中…" : "スレッドを作成"}
+        </Button>
+      </form>
+    </main>
   );
 }
