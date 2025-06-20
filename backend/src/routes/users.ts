@@ -33,4 +33,18 @@ router.get("/", async (ctx) => {
   ctx.body = users;
 });
 
+router.get("/:uid", async (ctx) => {
+  const { uid } = ctx.params;
+  const user = await prisma.user.findUnique({ where: { id: Number(uid) } });
+
+  if (!user) {
+    ctx.status = 404;
+    ctx.body = { error: "そんな奴知らないよ！" };
+  } else {
+    const { name, id, createdAt } = user;
+    ctx.status = 200;
+    ctx.body = { name, id, createdAt };
+  }
+});
+
 export default router;
