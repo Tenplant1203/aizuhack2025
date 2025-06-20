@@ -2,13 +2,20 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
+// ── ここで SSR 無効化して MindMap を読み込む ──
+const MindMap = dynamic(() => import("@/components/ui/MindMap"), {
+  ssr: false,
+});
+
 const API = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4000";
 
+/* ---------- 型定義 ---------- */
 type User = { id: number; name: string };
-
 type CommentNode = {
   uuid: string;
   content: string;
@@ -17,7 +24,6 @@ type CommentNode = {
   user?: User;
   children?: CommentNode[];
 };
-
 type ThreadDetail = {
   uuid: string;
   title: string;
@@ -27,7 +33,7 @@ type ThreadDetail = {
   comments: CommentNode[];
 };
 
-/* ------------ ページコンポーネント ------------ */
+/* ---------- ページコンポーネント ---------- */
 export default function ThreadDetailPage() {
   const { uuid } = useParams() as { uuid?: string };
   const [thread, setThread] = useState<ThreadDetail | null>(null);
@@ -35,7 +41,7 @@ export default function ThreadDetailPage() {
   const [error, setError] = useState<string>();
   const [newComment, setNewComment] = useState("");
 
-  /* --------- 初回ロード --------- */
+  /* 初回ロード */
   useEffect(() => {
     if (!uuid) {
       setError("UUID が URL に含まれていません");
@@ -45,8 +51,7 @@ export default function ThreadDetailPage() {
       try {
         const res = await fetch(`${API}/threads/${uuid}/tree`);
         if (!res.ok) throw new Error("thread-tree fetch failed");
-        const data: ThreadDetail = await res.json();
-        setThread(data);
+        setThread(await res.json());
       } catch (e: any) {
         setError(e.message);
       } finally {
@@ -55,26 +60,21 @@ export default function ThreadDetailPage() {
     })();
   }, [uuid]);
 
-  /* --------- コメント投稿 --------- */
+  /* コメント投稿 */
   const postComment = async () => {
     if (!uuid || !newComment.trim()) return;
-
     const payload = {
       content: newComment.trim(),
-      userId: 1, // TODO: Supabase Auth に置換
+      userId: 1,
       parentType: "thread",
       parentUuid: uuid,
     };
-
     try {
-      const res = await fetch(`${API}/comments`, {
+      await fetch(`${API}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      // コメント投稿後にツリー全体を取り直す
       const refreshed: ThreadDetail = await fetch(
         `${API}/threads/${uuid}/tree`,
       ).then((r) => r.json());
@@ -85,7 +85,7 @@ export default function ThreadDetailPage() {
     }
   };
 
-  /* --------- コメント描画 --------- */
+  /* コメント描画（再帰） */
   const renderComments = (nodes: CommentNode[], depth = 0) =>
     nodes.map((c) => (
       <div
@@ -97,13 +97,12 @@ export default function ThreadDetailPage() {
           {c.user?.name ?? "Unknown"} · {new Date(c.createdAt).toLocaleString()}
         </p>
         <p className="whitespace-pre-wrap">{c.content}</p>
-        {/* children 方式にも対応 */}
         {(c.children?.length ?? 0) > 0 &&
-          renderComments(c.children as CommentNode[], depth + 1)}
+          renderComments(c.children!, depth + 1)}
       </div>
     ));
 
-  /* --------- UI --------- */
+  /* UI */
   if (loading) return <p>読み込み中…</p>;
   if (error) return <p className="text-red-600">エラー: {error}</p>;
   if (!thread) return <p>スレッドが見つかりません</p>;
@@ -122,7 +121,7 @@ export default function ThreadDetailPage() {
 
       <hr />
 
-      {/* コメント一覧 */}
+      {/* コメント一覧（リスト表示） */}
       <section>
         <h2 className="text-2xl font-semibold mb-4">
           コメント ({thread.comments.length})
@@ -138,16 +137,33 @@ export default function ThreadDetailPage() {
 
       <hr />
 
+      <section className="pt-6">
+        <MindMap
+          thread={thread}
+          apiBase={API}
+          onPostSuccess={(c) => {
+            // コメントリスト側へも即反映
+            setThread((prev) =>
+              prev ? { ...prev, comments: [...prev.comments, c] } : prev,
+            );
+          }}
+        />
+      </section>
+
+      <hr />
+
       {/* コメント投稿フォーム */}
       <section className="space-y-2">
         <h3 className="text-xl font-semibold">コメントを書く</h3>
         <Textarea
           value={newComment}
-          onChange={(e) => setNewComment(e.currentTarget.value)}
+          onChange={(e) => setNewComment(e.target.value)}
           placeholder="コメントを入力…"
           rows={4}
         />
-        <Button onClick={postComment}>投稿する</Button>
+        <Button onClick={postComment} className="cursor-pointer">
+          投稿する
+        </Button>
       </section>
     </main>
   );

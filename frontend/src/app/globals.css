@@ -3,6 +3,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.react-flow__node {
+  @apply rounded-xl bg-white shadow p-2 text-sm max-w-xs break-words;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
