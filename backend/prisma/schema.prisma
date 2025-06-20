@@ -41,4 +41,5 @@ model Comment {
   user      User     @relation("UserComments", fields: [userId], references: [id])
   parentType String? // "thread" or "comment" どちらが親かを示す
   parentUuid String? // 親のuuid（ThreadまたはCommentのuuid）
+  depth       Int      @default(0)
 }
