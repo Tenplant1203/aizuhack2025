@@ -59,14 +59,19 @@ export default function MindMap({
       alert(await res.text()); // 400 をそのまま表示
       return;
     }
-    const newComment = await res.json(); // user が含まれて返る
+    const newComment = await res.json(); // userId が含まれて返る
+
+    // 投稿者の情報を取る
+    const author = await (
+      await fetch(`${apiBase}/users/${newComment.userId}`)
+    ).json();
 
     /* --- ④ 楽観ノード／エッジ追加 --- */
     const angle = Math.random() * Math.PI * 2;
     const newNode: Node = {
       id: newComment.uuid,
       type: "default",
-      data: { label: `${newComment.user.name}: ${newComment.content}` },
+      data: { label: `${author.name}: ${newComment.content}` },
       position: {
         x: replyTo.position.x + 220 * Math.cos(angle),
         y: replyTo.position.y + 220 * Math.sin(angle),
