@@ -16,18 +16,23 @@ export default function NewThreadPage() {
     setErr("");
 
     try {
+      const payload = { title, content, userId: 1 }; // 例として userId=1
+      console.log("▶︎ Sending payload:", payload);
+
       const res = await fetch(`${BASE_URL}/threads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, content, userId: 1 }), // ★仮ユーザーID
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
-        throw new Error(`API ${res.status}`);
+        const body = await res.json().catch(() => ({}));
+        console.error("❌ API 400 response:", body);
+        throw new Error(body.error || `HTTP ${res.status}`);
       }
       router.push("/threads");
-    } catch (error: any) {
-      setErr(error.message ?? "Failed to fetch");
+    } catch (err: any) {
+      setErr(err.message);
     }
   };
 
