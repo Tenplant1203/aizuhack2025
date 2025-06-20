@@ -4,24 +4,30 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 
-type Comment = {
+const API = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4000";
+
+type User = { id: number; name: string };
+
+type CommentNode = {
   uuid: string;
   content: string;
   createdAt: string;
-  user: { id: number; name: string };
-  children: Comment[];
+  depth: number;
+  user?: User;
+  children?: CommentNode[];
 };
+
 type ThreadDetail = {
   uuid: string;
   title: string;
   content: string;
   createdAt: string;
-  user: { id: number; name: string };
-  comments: Comment[];
+  user: User;
+  comments: CommentNode[];
 };
 
+/* ------------ ページコンポーネント ------------ */
 export default function ThreadDetailPage() {
   const { uuid } = useParams() as { uuid?: string };
   const [thread, setThread] = useState<ThreadDetail | null>(null);
@@ -29,63 +35,75 @@ export default function ThreadDetailPage() {
   const [error, setError] = useState<string>();
   const [newComment, setNewComment] = useState("");
 
+  /* --------- 初回ロード --------- */
   useEffect(() => {
-    if (!uuid) return setError("UUID が URL に含まれていません");
-
-    fetch(`http://localhost:4000/threads/${uuid}/tree`, { cache: "no-store" })
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`API エラー: ${res.status}`);
-        return res.json();
-      })
-      .then((data: ThreadDetail) => setThread(data))
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setLoading(false));
+    if (!uuid) {
+      setError("UUID が URL に含まれていません");
+      return;
+    }
+    (async () => {
+      try {
+        const res = await fetch(`${API}/threads/${uuid}/tree`);
+        if (!res.ok) throw new Error("thread-tree fetch failed");
+        const data: ThreadDetail = await res.json();
+        setThread(data);
+      } catch (e: any) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [uuid]);
 
+  /* --------- コメント投稿 --------- */
   const postComment = async () => {
     if (!uuid || !newComment.trim()) return;
+
     const payload = {
       content: newComment.trim(),
-      userId: 1,
+      userId: 1, // TODO: Supabase Auth に置換
       parentType: "thread",
       parentUuid: uuid,
     };
 
     try {
-      const res = await fetch("http://localhost:4000/comments", {
+      const res = await fetch(`${API}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || `HTTP ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      // コメント投稿後にツリー全体を取り直す
+      const refreshed: ThreadDetail = await fetch(
+        `${API}/threads/${uuid}/tree`,
+      ).then((r) => r.json());
+      setThread(refreshed);
       setNewComment("");
-      // コメント投稿後にリロード
-      setLoading(true);
-      const fresh = await fetch(`http://localhost:4000/threads/${uuid}/tree`, {
-        cache: "no-store",
-      });
-      setThread(await fresh.json());
     } catch (e: any) {
-      alert("コメント投稿でエラー: " + e.message);
-    } finally {
-      setLoading(false);
+      alert("コメント投稿エラー: " + e.message);
     }
   };
 
-  const renderComments = (comments: Comment[], depth = 0) =>
-    comments.map((c) => (
-      <div key={c.uuid} style={{ marginLeft: depth * 20 }} className="mb-2">
+  /* --------- コメント描画 --------- */
+  const renderComments = (nodes: CommentNode[], depth = 0) =>
+    nodes.map((c) => (
+      <div
+        key={c.uuid}
+        className="mb-3 border-l-2 pl-2"
+        style={{ marginLeft: depth * 16, borderColor: "#e2e8f0" }}
+      >
         <p className="text-sm text-gray-600">
-          {c.user.name} @ {new Date(c.createdAt).toLocaleString()}
+          {c.user?.name ?? "Unknown"} · {new Date(c.createdAt).toLocaleString()}
         </p>
-        <p className="pl-2">{c.content}</p>
-        {c.children.length > 0 && renderComments(c.children, depth + 1)}
+        <p className="whitespace-pre-wrap">{c.content}</p>
+        {/* children 方式にも対応 */}
+        {(c.children?.length ?? 0) > 0 &&
+          renderComments(c.children as CommentNode[], depth + 1)}
       </div>
     ));
 
+  /* --------- UI --------- */
   if (loading) return <p>読み込み中…</p>;
   if (error) return <p className="text-red-600">エラー: {error}</p>;
   if (!thread) return <p>スレッドが見つかりません</p>;
